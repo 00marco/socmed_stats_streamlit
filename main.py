@@ -2,6 +2,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore
 import streamlit as st
+import altair as alt
 
 import json
 import pandas as pd
@@ -42,8 +43,43 @@ def read_collection(collection_name):
 
     return data
 
+# Chart
 st.header('Tiktok stats for tiktok.com/mvrco_poloo')
-
+st.write("Engagement score")
 data = read_collection("tiktok_scraper")
 df = pd.DataFrame(data).sort_values("finished_at").head(20)
-st.line_chart(data=df, x="finished_at", y="engagement_score")
+c = (
+   alt.Chart(df)
+   .mark_line()
+   .encode(alt.Y('engagement_score').scale(zero=False), x="finished_at")
+)
+st.altair_chart(c, use_container_width=True)
+
+# Latest stats
+st.write("This week:")
+latest_row = df.tail(1).iloc[0]
+
+if latest_row["total_diggCount_diff"] != 0:
+    sign = "+" if latest_row["total_diggCount_diff"] > 0 else "-"
+    st.write(f"{sign}{latest_row['total_diggCount_diff']} likes")
+
+if latest_row["total_shareCount_diff"] != 0:
+    sign = "+" if latest_row["total_shareCount_diff"] > 0 else "-"
+    st.write(f"{sign}{latest_row['total_shareCount_diff']} shares")
+
+if latest_row["total_collectCount_diff"] != 0:
+    sign = "+" if latest_row["total_collectCount_diff"] > 0 else "-"
+    st.write(f"{sign}{latest_row['total_collectCount_diff']} saves")
+
+if latest_row["total_commentCount_diff"] != 0:
+    sign = "+" if latest_row["total_commentCount_diff"] > 0 else "-"
+    st.write(f"{sign}{latest_row['total_commentCount_diff']} comments")
+
+if latest_row["total_playCount_diff"] != 0:
+    sign = "+" if latest_row["total_playCount_diff"] > 0 else "-"
+    st.write(f"{sign}{latest_row['total_playCount_diff']} plays")
+
+if latest_row["follower_count_diff"] != 0:
+    sign = "+" if latest_row["follower_count_diff"] > 0 else "-"
+    st.write(f"{sign}{latest_row['follower_count_diff']} followers")
+
