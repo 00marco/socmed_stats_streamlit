@@ -131,7 +131,7 @@ st.write(" ")
 # Popup email list
 with st.form("my_form"):
     st.write("Still validating this idea, let me know what you think! 🧪📊")
-    answer_interest = st.text_input("Do you also want this for your own account?")
+    answer_interest = st.text_input("What metrics are you most interested in? (e.g. likes, shares, comments, etc.)")
     answer_price = st.number_input("How much would you pay for a service like this?", min_value=0)
     email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!")
 
@@ -142,7 +142,7 @@ with st.form("my_form"):
             st.write("email", email)
             appUtils.upload_record_if_not_exists("email_list", {"email": email, 
                                                                 "source": "socmed_analytics_app",
-                                                                "question_1": "Do you know any other app that also does this?",
+                                                                "question_1": "What metrics are you most interested in? (e.g. likes, shares, comments, etc.)",
                                                                 "answer_1": answer_interest,
                                                                 "question_2": "How much would you pay for a service like this?",
                                                                 "answer_2": answer_price})
