@@ -8,6 +8,8 @@ cffi==1.16.0
 charset-normalizer==3.3.2
 click==8.1.7
 cryptography==42.0.3
+dnspython==2.6.1
+filelock==3.13.1
 firebase-admin==6.4.0
 gitdb==4.0.11
 GitPython==3.1.42
@@ -39,6 +41,7 @@ pandas==2.2.0
 pillow==10.2.0
 proto-plus==1.23.0
 protobuf==4.25.3
+py3-validate-email @ git+https://gitea.ksol.io/karolyi/py3-validate-email@32c8f4cdfaba4c7e7fc81405a023c849a9268859
 pyarrow==15.0.0
 pyasn1==0.5.1
 pyasn1-modules==0.3.0
