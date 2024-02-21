@@ -119,9 +119,9 @@ latest_row = df.tail(1).iloc[0]
 
 
 if latest_row["engagement_score_diff"] > 0:
-    st.success("You're doing great this week. Keep it up!")
+    st.success("You're doing great this week. Keep it up! 🎉🎉")
 else:
-    st.error("You're not doing so well this week. Try to post more engaging content.")
+    st.error("You're not doing so well this week. Try to post more engaging content. ✊✊")
 st.write(" ")
 st.write(" ")
 st.write(" ")
@@ -130,10 +130,10 @@ st.write(" ")
 
 # Popup email list
 with st.form("my_form"):
-    st.write("Still validating this idea. Let me know what you think!")
+    st.write("Still validating this idea, let me know what you think! 🧪📊")
     answer_interest = st.text_input("Do you also want this for your own account?")
     answer_price = st.number_input("How much would you pay for a service like this?", min_value=0)
-    email = st.text_input("Enter email here")
+    email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!")
 
     submitted = st.form_submit_button("Submit")
 
