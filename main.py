@@ -80,7 +80,7 @@ st.header('Demo:')
 data = appUtils.read_collection("tiktok_scraper")
 df = pd.DataFrame(data).sort_values("finished_at").head(20)
 c = (
-   alt.Chart(df, title="Engagement score over time:")
+   alt.Chart(df, title="Engagement score for tiktok.com/mvrco_poloo's account over time:")
    .mark_line()
    .encode(alt.Y('engagement_score').scale(zero=False), x="finished_at")
    .properties(height=600)
