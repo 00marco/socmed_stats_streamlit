@@ -9,6 +9,10 @@ from validate_email import validate_email
 import json
 import pandas as pd
 
+import hashlib
+import uuid 
+
+
 class AppUtils:
     def __init__(self):
         service_account_json = {
@@ -29,20 +33,32 @@ class AppUtils:
         if not firebase_admin._apps:
             firebase_admin.initialize_app(cred)
         
+
+    def hash_string(self, input_string):
+        # Convert the input string to bytes
+        input_bytes = input_string.encode('utf-8')
+        
+        # Create a SHA-256 hash object
+        sha256_hash = hashlib.sha256()
+        
+        # Update the hash object with the input bytes
+        sha256_hash.update(input_bytes)
+        
+        # Get the hexadecimal representation of the hash
+        hashed_string = sha256_hash.hexdigest()
+        
+        return hashed_string
+
     def upload_record_if_not_exists(self, collection_name, data):
-    # Check if the record already exists
-        query = client.collection(collection_name).where("email", "==", data["email"])
-        results = query.get()
-        if len(results) == 0:
-            doc_ref.set(data)
+        # Check if the record already exists
+        doc_ref = self.client.collection(collection_name).document(self.hash_string(data["email"])).set(data)
 
     def read_collection(self, collection_name):
         # Authenticate to Firestore with the JSON account key.
         
-        client = firestore.client()
-        collection_ref = client.collection(collection_name)
+        self.client = firestore.client()
+        collection_ref = self.client.collection(collection_name)
         
-
         # Retrieve documents from the collection
         docs = collection_ref.stream()
         
@@ -65,7 +81,8 @@ class AppUtils:
         # Match the pattern with the email string
         match = re.match(email_pattern, email)
         
-        is_valid = validate_email(email_address=email)
+        # is_valid = validate_email(email_address=email) # idk its annoying
+        is_valid = True
 
         # Return True if the email matches the pattern, False otherwise
         return bool(match) and is_valid
@@ -128,23 +145,34 @@ st.write(" ")
 st.write(" ")
 st.write(" ")
 
+
+def on_click(appUtils):
+    if appUtils.is_valid_email(st.session_state.email):
+        st.toast("Thank you for your interest! \nWe'll keep you updated on our progress.", icon="🚀")
+        appUtils.upload_record_if_not_exists("email_list", {"email": email, 
+                                                            "source": "socmed_analytics_app",
+                                                            "question_1": "What metrics are you most interested in? (e.g. likes, shares, comments, etc.)",
+                                                            "answer_1": answer_interest,
+                                                            "question_2": "How much would you pay for a service like this?",
+                                                            "answer_2": answer_price})
+        st.session_state.email = ""
+        st.session_state.answer_interest = None
+        st.session_state.answer_price = 0
+        st.session_state.submitted = False
+    else:
+        st.toast("Please enter a valid email address.", icon="🚫")
+        # st.session_state.email = ""
+        # st.session_state.answer_interest = None
+        # st.session_state.answer_price = 0
+        # st.session_state.submitted = False
+
 # Popup email list
 with st.form("my_form"):
     st.write("Still validating this idea, let me know what you think! 🧪📊")
-    answer_interest = st.text_input("What metrics are you most interested in? (e.g. likes, shares, comments, etc.)")
-    answer_price = st.number_input("How much would you pay for a service like this?", min_value=0)
-    email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!")
+    answer_interest = st.text_input("What metrics are you most interested in? (e.g. likes, shares, comments, etc.)", key="answer_interest")
+    answer_price = st.number_input("How much would you pay for a service like this? (USD)", min_value=0, key="answer_price")
+    email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!", key="email")
+    submitted = st.form_submit_button("Submit", on_click=on_click, args=[appUtils])
 
-    submitted = st.form_submit_button("Submit")
+            
 
-    if len(email) > 0:
-        if submitted and appUtils.is_valid_email(email):
-            st.write("email", email)
-            appUtils.upload_record_if_not_exists("email_list", {"email": email, 
-                                                                "source": "socmed_analytics_app",
-                                                                "question_1": "What metrics are you most interested in? (e.g. likes, shares, comments, etc.)",
-                                                                "answer_1": answer_interest,
-                                                                "question_2": "How much would you pay for a service like this?",
-                                                                "answer_2": answer_price})
-        else:
-            st.write("Please enter a valid email address")
