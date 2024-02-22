@@ -152,10 +152,12 @@ def on_click(appUtils):
         st.toast("Thank you for your interest! \nWe'll keep you updated on our progress.", icon="🚀")
         appUtils.upload_record_if_not_exists("email_list", {"email": st.session_state.email, 
                                                             "source": "socmed_analytics_app",
-                                                            "question_1": "What metrics are you most interested in? (e.g. likes, shares, comments, etc.)",
+                                                            "question_1": "Any suggestions?",
                                                             "answer_1": st.session_state.answer_interest,
                                                             "question_2": "How much would you pay for a service like this?",
-                                                            "answer_2": st.session_state.answer_price})
+                                                            "answer_2": st.session_state.answer_price,
+                                                            "date_submitted": datetime.now()}
+        )
         st.session_state.email = ""
         st.session_state.answer_interest = None
         st.session_state.answer_price = 0
@@ -197,7 +199,7 @@ with st.sidebar:
 
     with st.form("my_form"):
         st.write("Still validating this idea, let me know what you think! 🧪📊")
-        answer_interest = st.text_input("What metrics are you most interested in? (e.g. likes, shares, comments, etc.)", key="answer_interest")
+        answer_interest = st.text_input("Any suggestions?", key="answer_interest")
         answer_price = st.number_input("How much would you pay for a service like this? (USD)", min_value=0, key="answer_price")
         email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!", key="email")
         submitted = st.form_submit_button("Submit", on_click=on_click, args=[appUtils])
