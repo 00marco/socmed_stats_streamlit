@@ -149,12 +149,12 @@ st.write(" ")
 def on_click(appUtils):
     if appUtils.is_valid_email(st.session_state.email):
         st.toast("Thank you for your interest! \nWe'll keep you updated on our progress.", icon="🚀")
-        appUtils.upload_record_if_not_exists("email_list", {"email": email, 
+        appUtils.upload_record_if_not_exists("email_list", {"email": st.session_state.email, 
                                                             "source": "socmed_analytics_app",
                                                             "question_1": "What metrics are you most interested in? (e.g. likes, shares, comments, etc.)",
-                                                            "answer_1": answer_interest,
+                                                            "answer_1": st.session_state.answer_interest,
                                                             "question_2": "How much would you pay for a service like this?",
-                                                            "answer_2": answer_price})
+                                                            "answer_2": st.session_state.answer_price})
         st.session_state.email = ""
         st.session_state.answer_interest = None
         st.session_state.answer_price = 0
