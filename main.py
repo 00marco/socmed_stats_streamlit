@@ -168,12 +168,36 @@ def on_click(appUtils):
         # st.session_state.submitted = False
 
 # Popup email list
-with st.form("my_form"):
-    st.write("Still validating this idea, let me know what you think! 🧪📊")
-    answer_interest = st.text_input("What metrics are you most interested in? (e.g. likes, shares, comments, etc.)", key="answer_interest")
-    answer_price = st.number_input("How much would you pay for a service like this? (USD)", min_value=0, key="answer_price")
-    email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!", key="email")
-    submitted = st.form_submit_button("Submit", on_click=on_click, args=[appUtils])
 
-            
 
+from datetime import datetime, timedelta
+
+def next_sunday():
+    today = datetime.now()
+    days_until_sunday = (6 - today.weekday()) % 7  # Calculate days until next Sunday
+    next_sunday_date = today + timedelta(days=days_until_sunday)
+    return next_sunday_date.strftime("%A, %B %d, %Y")
+
+
+with st.sidebar:
+    st.title("LazyMetrics 📊")
+    st.write("Get the gist with one look!")
+
+    st.divider()
+
+    st.subheader("🧍Target Audience:")
+    st.markdown("Need to grow a Tiktok account but hate scrolling? This might be for you *(Instagram metrics coming soon!)*")
+    st.write("")
+
+    next_run = next_sunday()
+    st.subheader(f"⏰ Next run on: {next_run}")
+    st.write("Stop obsessing. Your next reel isn't going to edit itself")
+
+    st.divider()
+
+    with st.form("my_form"):
+        st.write("Still validating this idea, let me know what you think! 🧪📊")
+        answer_interest = st.text_input("What metrics are you most interested in? (e.g. likes, shares, comments, etc.)", key="answer_interest")
+        answer_price = st.number_input("How much would you pay for a service like this? (USD)", min_value=0, key="answer_price")
+        email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!", key="email")
+        submitted = st.form_submit_button("Submit", on_click=on_click, args=[appUtils])
