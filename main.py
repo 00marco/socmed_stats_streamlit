@@ -96,10 +96,11 @@ st.header('Demo:')
 
 data = appUtils.read_collection("tiktok_scraper")
 df = pd.DataFrame(data).sort_values("finished_at").head(20)
+df["finished_at"] = pd.to_datetime(df["finished_at"]).dt.date
 c = (
    alt.Chart(df, title="Engagement score for tiktok.com/mvrco_poloo's account over time:")
    .mark_line()
-   .encode(alt.Y('engagement_score').scale(zero=False), x="finished_at")
+   .encode(alt.Y('engagement_score').scale(zero=False).title("Engagement Score"), x=alt.Y('finished_at').scale(zero=False).title("Date"))
    .properties(height=600)
 )
 st.altair_chart(c, use_container_width=True)
