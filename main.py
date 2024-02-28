@@ -5,12 +5,16 @@ import streamlit as st
 import altair as alt
 import re
 from validate_email import validate_email
+from st_paywall import add_auth
+
+add_auth(required=False)
 
 import json
 import pandas as pd
 
 import hashlib
 import uuid 
+from datetime import datetime, timedelta
 
 
 class AppUtils:
@@ -20,8 +24,8 @@ class AppUtils:
             "project_id": st.secrets["project_id"],
             "private_key_id": st.secrets["private_key_id"],
             "private_key": st.secrets["private_key"],
-            "client_email": st.secrets["client_email"],
-            "client_id": st.secrets["client_id"],
+            "client_email": st.secrets["client_email_firebase"],
+            "client_id": st.secrets["client_id_firebase"],
             "auth_uri": "https://accounts.google.com/o/oauth2/auth",
             "token_uri": "https://oauth2.googleapis.com/token",
             "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
@@ -32,7 +36,6 @@ class AppUtils:
         cred = credentials.Certificate(service_account_json)
         if not firebase_admin._apps:
             firebase_admin.initialize_app(cred)
-        
 
     def hash_string(self, input_string):
         # Convert the input string to bytes
@@ -87,101 +90,72 @@ class AppUtils:
         # Return True if the email matches the pattern, False otherwise
         return bool(match) and is_valid
 
+    def on_click(self, appUtils):
+        if appUtils.is_valid_email(st.session_state.email):
+            st.toast("Thank you for your interest! \nWe'll keep you updated on our progress.", icon="🚀")
+            appUtils.upload_record_if_not_exists("email_list", {"email": st.session_state.email, 
+                                                                "source": "socmed_analytics_app",
+                                                                "question_1": "Any suggestions?",
+                                                                "answer_1": st.session_state.answer_interest,
+                                                                "question_2": "How much would you pay for a service like this?",
+                                                                "answer_2": st.session_state.answer_price,
+                                                                "date_submitted": datetime.now()}
+            )
+            st.session_state.email = ""
+            st.session_state.answer_interest = None
+            st.session_state.answer_price = 0
+            st.session_state.submitted = False
+        else:
+            st.toast("Please enter a valid email address.", icon="🚫")
+            # st.session_state.email = ""
+            # st.session_state.answer_interest = None
+            # st.session_state.answer_price = 0
+            # st.session_state.submitted = False
+
+    def next_sunday(self, ):
+        today = datetime.now()
+        days_until_sunday = (6 - today.weekday()) % 7  # Calculate days until next Sunday
+        next_sunday_date = today + timedelta(days=days_until_sunday)
+        return next_sunday_date.strftime("%A, %B %d, %Y")
 
 appUtils = AppUtils()
 
-
 # Chart
-st.header('Demo:')
+if st.session_state.user_subscribed is False:
+    st.header('Demo:')
+else:
+    st.write("Setup")
+    instagram_user = st.write("Instagram Account Name: ")
+    tiktok_user = st.write("Tiktok Account Name: ")
+    st.button("Get data")
 
 data = appUtils.read_collection("tiktok_scraper")
 df = pd.DataFrame(data).sort_values("finished_at").head(20)
 df["finished_at"] = pd.to_datetime(df["finished_at"]).dt.date
 c = (
-   alt.Chart(df, title="Engagement score for tiktok.com/mvrco_poloo's account over time:")
-   .mark_line()
-   .encode(alt.Y('engagement_score').scale(zero=False).title("Engagement Score"), x=alt.Y('finished_at').scale(zero=False).title("Date"))
-   .properties(height=600)
+alt.Chart(df, title="Engagement score for tiktok.com/mvrco_poloo's account over time:")
+.mark_line()
+.encode(alt.Y('engagement_score').scale(zero=False).title("Engagement Score"), x=alt.Y('finished_at').scale(zero=False).title("Date"))
+.properties(height=600)
 )
 st.altair_chart(c, use_container_width=True)
-# st.divider()
-
-# Latest stats
-# st.write("This week you had:")
 latest_row = df.tail(1).iloc[0]
-
-# if latest_row["total_diggCount_diff"] != 0:
-#     sign = "+" if latest_row["total_diggCount_diff"] > 0 else "-"
-#     st.write(f"{sign}{latest_row['total_diggCount_diff']} likes")
-
-# if latest_row["total_shareCount_diff"] != 0:
-#     sign = "+" if latest_row["total_shareCount_diff"] > 0 else "-"
-#     st.write(f"{sign}{latest_row['total_shareCount_diff']} shares")
-
-# if latest_row["total_collectCount_diff"] != 0:
-#     sign = "+" if latest_row["total_collectCount_diff"] > 0 else "-"
-#     st.write(f"{sign}{latest_row['total_collectCount_diff']} saves")
-
-# if latest_row["total_commentCount_diff"] != 0:
-#     sign = "+" if latest_row["total_commentCount_diff"] > 0 else "-"
-#     st.write(f"{sign}{latest_row['total_commentCount_diff']} comments")
-
-# if latest_row["total_playCount_diff"] != 0:
-#     sign = "+" if latest_row["total_playCount_diff"] > 0 else "-"
-#     st.write(f"{sign}{latest_row['total_playCount_diff']} plays")
-
-# if latest_row["follower_count_diff"] != 0:
-#     sign = "+" if latest_row["follower_count_diff"] > 0 else "-"
-#     st.write(f"{sign}{latest_row['follower_count_diff']} followers")
-# st.divider()
-
 
 if latest_row["engagement_score_diff"] > 0:
     st.success("You're doing great this week. Keep it up! 🎉🎉")
 else:
-    st.error("You're not doing so well this week. Try to post more engaging content. ✊✊")
+    st.error("You're not doing so well this week. Try to post more engaging content! ✊✊")
 st.write(" ")
 st.write(" ")
 st.write(" ")
 st.write(" ")
 st.write(" ")
-
-
-def on_click(appUtils):
-    if appUtils.is_valid_email(st.session_state.email):
-        st.toast("Thank you for your interest! \nWe'll keep you updated on our progress.", icon="🚀")
-        appUtils.upload_record_if_not_exists("email_list", {"email": st.session_state.email, 
-                                                            "source": "socmed_analytics_app",
-                                                            "question_1": "Any suggestions?",
-                                                            "answer_1": st.session_state.answer_interest,
-                                                            "question_2": "How much would you pay for a service like this?",
-                                                            "answer_2": st.session_state.answer_price,
-                                                            "date_submitted": datetime.now()}
-        )
-        st.session_state.email = ""
-        st.session_state.answer_interest = None
-        st.session_state.answer_price = 0
-        st.session_state.submitted = False
-    else:
-        st.toast("Please enter a valid email address.", icon="🚫")
-        # st.session_state.email = ""
-        # st.session_state.answer_interest = None
-        # st.session_state.answer_price = 0
-        # st.session_state.submitted = False
-
-# Popup email list
-
-
-from datetime import datetime, timedelta
-
-def next_sunday():
-    today = datetime.now()
-    days_until_sunday = (6 - today.weekday()) % 7  # Calculate days until next Sunday
-    next_sunday_date = today + timedelta(days=days_until_sunday)
-    return next_sunday_date.strftime("%A, %B %d, %Y")
 
 
 with st.sidebar:
+    # Divider
+    st.divider()
+
     st.title("LazyMetrics 📊")
     st.write("Get the gist with one look!")
 
@@ -191,7 +165,7 @@ with st.sidebar:
     st.markdown("Need to grow a Tiktok account but hate scrolling? This might be for you *(Instagram metrics coming soon!)*")
     st.write("")
 
-    next_run = next_sunday()
+    next_run = appUtils.next_sunday()
     st.subheader(f"⏰ Next run on: {next_run}")
     st.write("Stop obsessing. Your next reel isn't going to edit itself")
 
@@ -202,4 +176,4 @@ with st.sidebar:
         answer_interest = st.text_input("Any suggestions?", key="answer_interest")
         answer_price = st.number_input("How much would you pay for a service like this? (USD)", min_value=0, key="answer_price")
         email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!", key="email")
-        submitted = st.form_submit_button("Submit", on_click=on_click, args=[appUtils])
+        submitted = st.form_submit_button("Submit", on_click=appUtils.on_click, args=[appUtils])
