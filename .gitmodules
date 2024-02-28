@@ -1,0 +1,3 @@
+[submodule "st-paywall-custom"]
+	path = st-paywall-custom
+	url = https://github.com/00marco/st-paywall-custom.git
