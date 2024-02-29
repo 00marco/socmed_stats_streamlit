@@ -7,7 +7,6 @@ import re
 from validate_email import validate_email
 from st_paywall import add_auth
 
-
 import json
 import pandas as pd
 
@@ -119,6 +118,8 @@ class AppUtils:
 
 appUtils = AppUtils()
 
+def login_callback():
+    st.balloons()
 
 # Sidebar
 with st.sidebar:
@@ -126,8 +127,16 @@ with st.sidebar:
     st.write("Get the gist with one look!")
     st.write("")
 
-add_auth(required=False, login_sidebar=True, subscribe_now_sidebar=False)
+# Subscribe now! (st-paywall restriction forces me to split the sidebar into two parts lmao)
+st.header("Get the gist with one look!")
+add_auth(required=False, 
+         login_sidebar=True, 
+         subscribe_now_sidebar=False, 
+         on_login=login_callback)
+if not st.session_state.get("email", None): 
+    st.write("Log in to try it out!")
 
+# Sidebar continued
 with st.sidebar:
     st.divider()
     st.subheader("🧍Target Audience:")
@@ -146,19 +155,12 @@ with st.sidebar:
         email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!", key="email")
         submitted = st.form_submit_button("Submit", on_click=appUtils.on_click, args=[appUtils])
 
-# Chart
-if len(st.session_state.get("email", "")) > 0 and not st.session_state.get("user_subscribed", False):
-    st.write("")
+# Welcome text
+if not (len(st.session_state.get("email", "")) > 0 and st.session_state.user_subscribed):
     st.divider()
+    st.subheader("Demo")
 
-if st.session_state.get("user_subscribed", False) is False:
-    st.header('Demo:')
-else:
-    st.header("Welcome!")
-    # instagram_user = st.write("Instagram Account Name: ")
-    # tiktok_user = st.write("Tiktok Account Name: ")
-    # st.button("Get data")
-
+# Chart
 data = appUtils.read_collection("tiktok_scraper")
 df = pd.DataFrame(data).sort_values("finished_at").head(20)
 df["finished_at"] = pd.to_datetime(df["finished_at"]).dt.date
