@@ -7,7 +7,6 @@ import re
 from validate_email import validate_email
 from st_paywall import add_auth
 
-add_auth(required=False)
 
 import json
 import pandas as pd
@@ -120,14 +119,45 @@ class AppUtils:
 
 appUtils = AppUtils()
 
+
+# Sidebar
+with st.sidebar:
+    st.title("LazyMetrics 📊")
+    st.write("Get the gist with one look!")
+    st.write("")
+
+add_auth(required=False, login_sidebar=True, subscribe_now_sidebar=False)
+
+with st.sidebar:
+    st.divider()
+    st.subheader("🧍Target Audience:")
+    st.markdown("Need to grow a Tiktok account but hate scrolling? This might be for you *(Instagram metrics coming soon!)*")
+
+    next_run = appUtils.next_sunday()
+    st.subheader(f"⏰ Next run on: {next_run}")
+    st.write("Stop obsessing. Your next reel isn't going to edit itself")
+
+    st.divider()
+
+    with st.form("my_form"):
+        st.write("Still validating this idea, let me know what you think! 🧪📊")
+        answer_interest = st.text_input("Any suggestions?", key="answer_interest")
+        answer_price = st.number_input("How much would you pay for a service like this? (USD)", min_value=0, key="answer_price")
+        email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!", key="email")
+        submitted = st.form_submit_button("Submit", on_click=appUtils.on_click, args=[appUtils])
+
 # Chart
-if st.session_state.user_subscribed is False:
+if len(st.session_state.get("email", "")) > 0 and not st.session_state.get("user_subscribed", False):
+    st.write("")
+    st.divider()
+
+if st.session_state.get("user_subscribed", False) is False:
     st.header('Demo:')
 else:
-    st.write("Setup")
-    instagram_user = st.write("Instagram Account Name: ")
-    tiktok_user = st.write("Tiktok Account Name: ")
-    st.button("Get data")
+    st.header("Welcome!")
+    # instagram_user = st.write("Instagram Account Name: ")
+    # tiktok_user = st.write("Tiktok Account Name: ")
+    # st.button("Get data")
 
 data = appUtils.read_collection("tiktok_scraper")
 df = pd.DataFrame(data).sort_values("finished_at").head(20)
@@ -150,30 +180,3 @@ st.write(" ")
 st.write(" ")
 st.write(" ")
 st.write(" ")
-
-
-with st.sidebar:
-    # Divider
-    st.divider()
-
-    st.title("LazyMetrics 📊")
-    st.write("Get the gist with one look!")
-
-    st.divider()
-
-    st.subheader("🧍Target Audience:")
-    st.markdown("Need to grow a Tiktok account but hate scrolling? This might be for you *(Instagram metrics coming soon!)*")
-    st.write("")
-
-    next_run = appUtils.next_sunday()
-    st.subheader(f"⏰ Next run on: {next_run}")
-    st.write("Stop obsessing. Your next reel isn't going to edit itself")
-
-    st.divider()
-
-    with st.form("my_form"):
-        st.write("Still validating this idea, let me know what you think! 🧪📊")
-        answer_interest = st.text_input("Any suggestions?", key="answer_interest")
-        answer_price = st.number_input("How much would you pay for a service like this? (USD)", min_value=0, key="answer_price")
-        email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!", key="email")
-        submitted = st.form_submit_button("Submit", on_click=appUtils.on_click, args=[appUtils])
