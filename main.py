@@ -171,7 +171,7 @@ if st.session_state.get("email", None):
     if st.session_state.get("user_subscribed", False):
         st.write("")
         st.text_input("Tiktok handle", value=user.get("tiktok_account"))
-        st.text_input("Instagram handle", value=user.get("instagram_account"))
+        st.text_input("Instagram handle", value=user.get("instagram_account")) #disable if value is not null
         st.divider()
         
     st.balloons()
