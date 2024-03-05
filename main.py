@@ -17,6 +17,7 @@ from datetime import datetime, timedelta
 
 class AppUtils:
     def __init__(self):
+
         service_account_json = {
             "type": "service_account",
             "project_id": st.secrets["project_id"],
@@ -35,7 +36,10 @@ class AppUtils:
         if not firebase_admin._apps:
             firebase_admin.initialize_app(cred)
 
+        self.client = firestore.client()
+
     def hash_string(self, input_string):
+        print("input string", input_string)
         # Convert the input string to bytes
         input_bytes = input_string.encode('utf-8')
         
@@ -48,16 +52,25 @@ class AppUtils:
         # Get the hexadecimal representation of the hash
         hashed_string = sha256_hash.hexdigest()
         
+        print("hashed string", hashed_string)
+
         return hashed_string
 
+    def check_user_if_exists(self, email):
+        try:
+            doc_ref = self.client.collection("user").document(self.hash_string()).get()
+            return doc_ref.to_dict()
+        except Exception as e:
+            return None
+    
     def upload_record_if_not_exists(self, collection_name, data):
         # Check if the record already exists
         doc_ref = self.client.collection(collection_name).document(self.hash_string(data["email"])).set(data)
+        print(f"{data} uploaded")
 
     def read_collection(self, collection_name):
         # Authenticate to Firestore with the JSON account key.
         
-        self.client = firestore.client()
         collection_ref = self.client.collection(collection_name)
         
         # Retrieve documents from the collection
@@ -66,8 +79,8 @@ class AppUtils:
         # Iterate over the documents and print them
         data = []
         for doc in docs:
-            print(f"Document ID: {doc.id}")
-            print(f"Data: {doc.to_dict()['dataset_id']}, {doc.to_dict()['finished_at']}, {doc.to_dict()['engagement_score_diff']}")
+            # print(f"Document ID: {doc.id}")
+            # print(f"Data: {doc.to_dict()['dataset_id']}, {doc.to_dict()['finished_at']}, {doc.to_dict()['engagement_score_diff']}")
             data.append(doc.to_dict())
 
         return data
@@ -119,22 +132,49 @@ class AppUtils:
 appUtils = AppUtils()
 
 def login_callback():
-    st.balloons()
+    pass
 
 # Sidebar
 with st.sidebar:
     st.title("LazyMetrics 📊")
-    st.write("Get the gist with one look!")
     st.write("")
 
 # Subscribe now! (st-paywall restriction forces me to split the sidebar into two parts lmao)
 st.header("Get the gist with one look!")
+
 add_auth(required=False, 
          login_sidebar=True, 
          subscribe_now_sidebar=False, 
          on_login=login_callback)
+
 if not st.session_state.get("email", None): 
     st.write("Log in to try it out!")
+
+if st.session_state.get("email", None):
+    print("check user")
+    user = appUtils.check_user_if_exists(st.session_state.email)
+    print("user", user)
+    if user is not None:
+        st.toast(f"user exists: {user}")
+    else:
+        user = {}
+        st.toast("no record found")
+        print("no record found")
+        appUtils.upload_record_if_not_exists("user",
+                                             data={
+                                                 "email": st.session_state.email,
+                                                 "data": {}
+                                             }
+                                             
+                                             )
+    
+    if st.session_state.get("user_subscribed", False):
+        st.write("")
+        st.text_input("Tiktok handle", value=user.get("tiktok_account"))
+        st.text_input("Instagram handle", value=user.get("instagram_account"))
+        st.divider()
+        
+    st.balloons()
 
 # Sidebar continued
 with st.sidebar:
