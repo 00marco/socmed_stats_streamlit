@@ -58,7 +58,7 @@ class AppUtils:
 
     def check_user_if_exists(self, email):
         try:
-            doc_ref = self.client.collection("user").document(self.hash_string()).get()
+            doc_ref = self.client.collection("user").document(self.hash_string(email)).get()
             return doc_ref.to_dict()
         except Exception as e:
             return None
@@ -151,27 +151,38 @@ if not st.session_state.get("email", None):
     st.write("Log in to try it out!")
 
 if st.session_state.get("email", None):
-    print("check user")
     user = appUtils.check_user_if_exists(st.session_state.email)
-    print("user", user)
+    warn_before_delete = False
     if user is not None:
         st.toast(f"user exists: {user}")
+        tiktok_handle = user.get("data", {}).get("tiktok_handle")
+        instagram_handle = user.get("data", {}).get("instagram_handle")
+        if not tiktok_handle or not instagram_handle:
+            warn_before_delete = True
     else:
         user = {}
         st.toast("no record found")
-        print("no record found")
         appUtils.upload_record_if_not_exists("user",
                                              data={
                                                  "email": st.session_state.email,
                                                  "data": {}
-                                             }
-                                             
-                                             )
+                                             })
+        tiktok_handle = ""
+        instagram_handle = ""
     
     if st.session_state.get("user_subscribed", False):
         st.write("")
-        st.text_input("Tiktok handle", value=user.get("tiktok_account"))
-        st.text_input("Instagram handle", value=user.get("instagram_account")) #disable if value is not null
+        st.text_input("Tiktok handle", placeholder=tiktok_handle, key="tiktok_handle")
+        st.text_input("Instagram handle", placeholder=instagram_handle, key="instagram_handle") #disable if value is not null
+        if st.button("Save"):
+            appUtils.upload_record_if_not_exists("user",
+                                                data={
+                                                    "email": st.session_state.email,
+                                                    "data": {
+                                                        "instagram_handle": st.session_state.instagram_handle,
+                                                        "tiktok_handle": st.session_state.tiktok_handle
+                                                    }
+                                                })
         st.divider()
         
     st.balloons()
