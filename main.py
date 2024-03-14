@@ -134,6 +134,11 @@ appUtils = AppUtils()
 def login_callback():
     pass
 
+# Initialization
+st.session_state.tiktok_handle = "mvrco_poloo"
+st.session_state.instagram_handle = "mvrco_poloo"
+
+
 # Sidebar
 with st.sidebar:
     st.title("LazyMetrics 📊")
@@ -212,22 +217,27 @@ if not (len(st.session_state.get("email", "")) > 0 and st.session_state.user_sub
     st.subheader("Demo")
 
 # Chart
-data = appUtils.read_collection("tiktok_scraper")
-df = pd.DataFrame(data).sort_values("finished_at").head(20)
-df["finished_at"] = pd.to_datetime(df["finished_at"]).dt.date
+data = appUtils.read_collection("metrics")
+df = pd.DataFrame(data)
+df = df.loc[(df["user"]==st.session_state.tiktok_handle) |( df["user"]==st.session_state.instagram_handle)]
+df = df.sort_values("timestamp")
+df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.date
 c = (
 alt.Chart(df, title="Engagement score for tiktok.com/mvrco_poloo's account over time:")
 .mark_line()
-.encode(alt.Y('engagement_score').scale(zero=False).title("Engagement Score"), x=alt.Y('finished_at').scale(zero=False).title("Date"))
+.encode(alt.Y('engagement_score').scale(zero=False).title("Engagement Score"), 
+        x=alt.Y('timestamp').scale(zero=False).title("Date"),
+        color=alt.Y("source"))
 .properties(height=600)
 )
 st.altair_chart(c, use_container_width=True)
-latest_row = df.tail(1).iloc[0]
+# df["engagement_score_diff"] = df["engagement_score"].diff()
+# latest_row = df.tail(1).iloc[0]
 
-if latest_row["engagement_score_diff"] > 0:
-    st.success("You're doing great this week. Keep it up! 🎉🎉")
-else:
-    st.error("You're not doing so well this week. Try to post more engaging content! ✊✊")
+# if latest_row["engagement_score_diff"] > 0:
+#     st.success("You're doing great this week. Keep it up! 🎉🎉")
+# else:
+#     st.error("You're not doing so well this week. Try to post more engaging content! ✊✊")
 st.write(" ")
 st.write(" ")
 st.write(" ")
