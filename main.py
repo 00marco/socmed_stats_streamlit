@@ -219,7 +219,7 @@ if not (len(st.session_state.get("email", "")) > 0 and st.session_state.user_sub
 # Chart
 data = appUtils.read_collection("metrics")
 df = pd.DataFrame(data)
-df = df.loc[(df["user"]==st.session_state.tiktok_handle) |( df["user"]==st.session_state.instagram_handle)]
+df = df.loc[(df["account_name"]==st.session_state.tiktok_handle) |( df["account_name"]==st.session_state.instagram_handle)]
 df = df.sort_values("timestamp")
 df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.date
 c = (
