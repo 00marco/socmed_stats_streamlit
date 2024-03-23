@@ -197,10 +197,7 @@ if st.session_state.get("email", None):
     
 # Welcome text
 st.title("Hello!")
-if not (len(st.session_state.get("email", "")) > 0 and st.session_state.user_subscribed):
-    st.write("\n")
-    st.write("\n")
-    # st.divider()
+# st.divider()
 
 # Chart
 data = appUtils.read_collection("metrics")
@@ -208,13 +205,19 @@ df = pd.DataFrame(data)
 df = df.loc[(df["account_name"]==st.session_state.tiktok_handle) |( df["account_name"]==st.session_state.instagram_handle)]
 df = df.sort_values("timestamp")
 df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.date
+
+scale = alt.Scale(
+    domain=["tiktok", "instagram"],
+    range=["#2af0ea", "#E1306C"],
+)
+color = alt.Color("source:N", scale=scale)
 c = (
-alt.Chart(df)
-.mark_line()
-.encode(alt.Y('engagement_score').scale(zero=False).title("Engagement Score"), 
-        x=alt.Y('timestamp').scale(zero=False).title("Date"),
-        color=alt.Y("source"))
-.properties(height=600)
+    alt.Chart(df)
+    .mark_line()
+    .encode(alt.Y('engagement_score').scale(zero=False).title("Engagement Score"), 
+            x=alt.Y('timestamp').scale(zero=False).title("Date"),
+            color=color)
+    .properties(height=600)
 )
 st.header("Engagement Score")
 st.write("Likes, comments, shares, and views are all taken into account. 📈📉")
