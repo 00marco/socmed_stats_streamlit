@@ -231,11 +231,11 @@ st.altair_chart(c, use_container_width=True)
 #     st.error("You're not doing so well this week. Try to post more engaging content! ✊✊")
 
 df = df[["source", "timestamp", "engagement_score"]]
-df["likes"] = 0
-df["comments"] = 0
-df["followers"] = 0
-df["shares"] = 0
-df["views"] = 0
+df["Total likes"] = 0
+df["Total comments"] = 0
+df["Total followers"] = 0
+df["Total shares"] = 0
+df["Total views"] = 0
 st.header("Data")
 for source in df["source"].unique().tolist():
     st.write(source)
