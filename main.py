@@ -219,7 +219,7 @@ c = (
             color=color)
     .properties(height=600)
 )
-st.header("Engagement Score")
+st.header("(Demo) Engagement Score")
 st.write("Likes, comments, shares, and views are all taken into account. 📈📉")
 st.altair_chart(c, use_container_width=True)
 # df["engagement_score_diff"] = df["engagement_score"].diff()
