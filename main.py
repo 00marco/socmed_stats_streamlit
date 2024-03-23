@@ -143,6 +143,7 @@ st.set_page_config(layout="wide")
 # Sidebar
 with st.sidebar:
     st.title("LazyMetrics 📊")
+    st.write("For the easily distracted social media manager")
     st.write("")
 
 # Subscribe now! (st-paywall restriction forces me to split the sidebar into two parts lmao)
@@ -193,39 +194,30 @@ if st.session_state.get("email", None):
         
     st.balloons()
 
-# Sidebar continued
-with st.sidebar:
-    # st.divider()
-    # st.subheader("🧍Target Audience:")
-    # st.markdown("Need to grow a Tiktok account but hate scrolling? This might be for you *(Instagram metrics coming soon!)*")
-
-    # next_run = appUtils.next_sunday()
-    # st.subheader(f"⏰ Next run on: {next_run}")
-    # st.write("Stop obsessing. Your next reel isn't going to edit itself")
-
-    st.divider()
-
     
 # Welcome text
-# if not (len(st.session_state.get("email", "")) > 0 and st.session_state.user_subscribed):
-#     st.divider()
-#     st.subheader("Demo")
+st.title("Hello!")
+if not (len(st.session_state.get("email", "")) > 0 and st.session_state.user_subscribed):
+    st.write("\n")
+    st.write("\n")
+    # st.divider()
 
 # Chart
-st.title("Good morning!")
 data = appUtils.read_collection("metrics")
 df = pd.DataFrame(data)
 df = df.loc[(df["account_name"]==st.session_state.tiktok_handle) |( df["account_name"]==st.session_state.instagram_handle)]
 df = df.sort_values("timestamp")
 df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.date
 c = (
-alt.Chart(df, title="Engagement score for tiktok.com/mvrco_poloo's account over time:")
+alt.Chart(df)
 .mark_line()
 .encode(alt.Y('engagement_score').scale(zero=False).title("Engagement Score"), 
         x=alt.Y('timestamp').scale(zero=False).title("Date"),
         color=alt.Y("source"))
 .properties(height=600)
 )
+st.header("Engagement Score")
+st.write("Likes, comments, shares, and views are all taken into account. 📈📉")
 st.altair_chart(c, use_container_width=True)
 # df["engagement_score_diff"] = df["engagement_score"].diff()
 # latest_row = df.tail(1).iloc[0]
@@ -235,6 +227,16 @@ st.altair_chart(c, use_container_width=True)
 # else:
 #     st.error("You're not doing so well this week. Try to post more engaging content! ✊✊")
 
+df = df[["source", "timestamp", "engagement_score"]]
+df["likes"] = 0
+df["comments"] = 0
+df["followers"] = 0
+df["shares"] = 0
+df["views"] = 0
+st.header("Data")
+for source in df["source"].unique().tolist():
+    st.write(source)
+    st.dataframe(df.loc[df["source"]==source].set_index("timestamp").sort_values("timestamp", ascending=False), use_container_width=True)
 
 st.write(" ")
 st.write(" ")
