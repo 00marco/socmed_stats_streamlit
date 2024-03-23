@@ -137,6 +137,7 @@ def login_callback():
 # Initialization
 st.session_state.tiktok_handle = "mvrco_poloo"
 st.session_state.instagram_handle = "mvrco_poloo"
+st.set_page_config(layout="wide")
 
 
 # Sidebar
@@ -145,15 +146,15 @@ with st.sidebar:
     st.write("")
 
 # Subscribe now! (st-paywall restriction forces me to split the sidebar into two parts lmao)
-st.header("Get the gist with one look!")
+# st.header("Get the gist with one look!")
 
 add_auth(required=False, 
          login_sidebar=True, 
          subscribe_now_sidebar=False, 
          on_login=login_callback)
 
-if not st.session_state.get("email", None): 
-    st.write("Log in to try it out!")
+# if not st.session_state.get("email", None): 
+#     st.write("Log in to try it out!")
 
 if st.session_state.get("email", None):
     user = appUtils.check_user_if_exists(st.session_state.email)
@@ -194,29 +195,24 @@ if st.session_state.get("email", None):
 
 # Sidebar continued
 with st.sidebar:
+    # st.divider()
+    # st.subheader("🧍Target Audience:")
+    # st.markdown("Need to grow a Tiktok account but hate scrolling? This might be for you *(Instagram metrics coming soon!)*")
+
+    # next_run = appUtils.next_sunday()
+    # st.subheader(f"⏰ Next run on: {next_run}")
+    # st.write("Stop obsessing. Your next reel isn't going to edit itself")
+
     st.divider()
-    st.subheader("🧍Target Audience:")
-    st.markdown("Need to grow a Tiktok account but hate scrolling? This might be for you *(Instagram metrics coming soon!)*")
 
-    next_run = appUtils.next_sunday()
-    st.subheader(f"⏰ Next run on: {next_run}")
-    st.write("Stop obsessing. Your next reel isn't going to edit itself")
-
-    st.divider()
-
-    with st.form("my_form"):
-        st.write("Still validating this idea, let me know what you think! 🧪📊")
-        answer_interest = st.text_input("Any suggestions?", key="answer_interest")
-        answer_price = st.number_input("How much would you pay for a service like this? (USD)", min_value=0, key="answer_price")
-        email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!", key="email")
-        submitted = st.form_submit_button("Submit", on_click=appUtils.on_click, args=[appUtils])
-
+    
 # Welcome text
-if not (len(st.session_state.get("email", "")) > 0 and st.session_state.user_subscribed):
-    st.divider()
-    st.subheader("Demo")
+# if not (len(st.session_state.get("email", "")) > 0 and st.session_state.user_subscribed):
+#     st.divider()
+#     st.subheader("Demo")
 
 # Chart
+st.title("Good morning!")
 data = appUtils.read_collection("metrics")
 df = pd.DataFrame(data)
 df = df.loc[(df["account_name"]==st.session_state.tiktok_handle) |( df["account_name"]==st.session_state.instagram_handle)]
@@ -238,8 +234,17 @@ st.altair_chart(c, use_container_width=True)
 #     st.success("You're doing great this week. Keep it up! 🎉🎉")
 # else:
 #     st.error("You're not doing so well this week. Try to post more engaging content! ✊✊")
+
+
 st.write(" ")
 st.write(" ")
 st.write(" ")
 st.write(" ")
 st.write(" ")
+
+with st.form("my_form"):
+        st.write("Still validating this idea, let me know what you think! 🧪📊")
+        answer_interest = st.text_input("Any suggestions?", key="answer_interest")
+        answer_price = st.number_input("How much would you pay for a service like this? (USD)", min_value=0, key="answer_price")
+        email = st.text_input("Would you like to receive launch updates via email? Enter your email address below!", key="email")
+        submitted = st.form_submit_button("Submit", on_click=appUtils.on_click, args=[appUtils])
