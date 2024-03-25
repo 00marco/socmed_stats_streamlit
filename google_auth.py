@@ -32,7 +32,7 @@ async def get_authorization_url(client: GoogleOAuth2, redirect_url: str) -> str:
     authorization_url = await client.get_authorization_url(
         redirect_url,
         scope=["email"],
-        extras_params={"access_type": "offline"},
+        # extras_params={"access_type": "offline"},
     )
     return authorization_url
 
