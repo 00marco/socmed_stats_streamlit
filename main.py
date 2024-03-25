@@ -134,7 +134,7 @@ class AppUtils:
             st.session_state.tiktok_handle = "mvrco_poloo"
             st.session_state.instagram_handle = "mvrco_poloo"
         elif st.session_state.demo_user_selectbox == "Demo User 2 (le_sserafim)":
-            st.session_state.tiktok_handle = "le_sserafim"
+            st.session_state.tiktok_handle = "LE SSERAFIM"
             st.session_state.instagram_handle = "le_sserafim"
         else:  
             st.session_state.tiktok_handle = "enhypen"
