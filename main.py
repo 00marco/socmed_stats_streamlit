@@ -191,13 +191,20 @@ if st.session_state.get("email", None):
                                                     }
                                                 })
         st.divider()
+    else:
+        st.divider()
         
     st.balloons()
+else:
+    option = st.selectbox(
+    "Select demo user",
+    ("Demo User 1 (mvrco_poloo)", "Demo User 2 (le_sserafim)", "Demo User 3 (enhypen)"))
+    st.write("")
+    st.divider()
 
     
 # Welcome text
 st.title("Hello!")
-# st.divider()
 
 # Chart
 data = appUtils.read_collection("metrics")
@@ -219,7 +226,12 @@ c = (
             color=color)
     .properties(height=600)
 )
-st.header("(Demo) Engagement Score")
+
+
+if st.session_state.get("email", None):
+    st.header("Engagement Score")
+else:
+    st.header("(Demo) Engagement Score")
 st.write("Likes, comments, shares, and views are all taken into account. 📈📉")
 st.altair_chart(c, use_container_width=True)
 # df["engagement_score_diff"] = df["engagement_score"].diff()
