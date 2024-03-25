@@ -230,20 +230,26 @@ st.altair_chart(c, use_container_width=True)
 # else:
 #     st.error("You're not doing so well this week. Try to post more engaging content! ✊✊")
 
-df = df[["source", "timestamp", "engagement_score"]]
-df["Total likes"] = 0
-df["Total comments"] = 0
-df["Total followers"] = 0
-df["Total shares"] = 0
-df["Total views"] = 0
+df = df[["source", "timestamp", "engagement_score", "total_comments", "total_views", "total_likes", "total_followers"]].rename(columns={
+    "timestamp": "Date",
+    "source": "Source",
+    "engagement_score": "Engagement Score",
+    "total_comments":"Total Comments",
+    "total_views":"Total Views",
+    "total_likes":"Total Likes",
+    "total_followers":"Total Followers"
+})
 st.header("Data")
-for source in df["source"].unique().tolist():
+for source in df["Source"].unique().tolist():
     st.write(source)
-    st.dataframe(df.loc[df["source"]==source].set_index("timestamp").sort_values("timestamp", ascending=False), use_container_width=True)
+    st.dataframe(df.loc[df["Source"]==source].set_index("Date").sort_values("Date", ascending=False), use_container_width=True)
 
 st.write(" ")
 st.write(" ")
 st.write(" ")
+st.write(" ")
+st.write(" ")
+st.divider()
 st.write(" ")
 st.write(" ")
 
