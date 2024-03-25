@@ -140,14 +140,14 @@ class AppUtils:
             st.session_state.tiktok_handle = "enhypen"
             st.session_state.instagram_handle = "enhypen"
             
-        st.toast("toggle")
-        st.toast(st.session_state.tiktok_handle)
-        st.toast(st.session_state.instagram_handle)
+        # st.toast("toggle")
+        # st.toast(st.session_state.tiktok_handle)
+        # st.toast(st.session_state.instagram_handle)
         
     def get_chart(self):
-        st.toast("get chart")
-        st.toast(st.session_state.tiktok_handle)
-        st.toast(st.session_state.instagram_handle)
+        # st.toast("get chart")
+        # st.toast(st.session_state.tiktok_handle)
+        # st.toast(st.session_state.instagram_handle)
 
         data = appUtils.read_collection("metrics")
         df = pd.DataFrame(data)
@@ -168,7 +168,7 @@ class AppUtils:
                     color=color)
             .properties(height=600)
         )
-        st.toast(f"df shape: {df.shape}")
+        # st.toast(f"df shape: {df.shape}")
         return c, df
 
 
