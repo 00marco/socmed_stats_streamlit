@@ -129,16 +129,60 @@ class AppUtils:
         next_sunday_date = today + timedelta(days=days_until_sunday)
         return next_sunday_date.strftime("%A, %B %d, %Y")
 
+    def toggle_demo_user(self):
+        if st.session_state.demo_user_selectbox == "Demo User 1 (mvrco_poloo)":
+            st.session_state.tiktok_handle = "mvrco_poloo"
+            st.session_state.instagram_handle = "mvrco_poloo"
+        elif st.session_state.demo_user_selectbox == "Demo User 2 (le_sserafim)":
+            st.session_state.tiktok_handle = "le_sserafim"
+            st.session_state.instagram_handle = "le_sserafim"
+        else:  
+            st.session_state.tiktok_handle = "enhypen"
+            st.session_state.instagram_handle = "enhypen"
+            
+        st.toast("toggle")
+        st.toast(st.session_state.tiktok_handle)
+        st.toast(st.session_state.instagram_handle)
+        
+    def get_chart(self):
+        st.toast("get chart")
+        st.toast(st.session_state.tiktok_handle)
+        st.toast(st.session_state.instagram_handle)
+
+        data = appUtils.read_collection("metrics")
+        df = pd.DataFrame(data)
+        df = df.loc[(df["account_name"]==st.session_state.tiktok_handle) |( df["account_name"]==st.session_state.instagram_handle)]
+        df = df.sort_values("timestamp")
+        df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.date
+
+        scale = alt.Scale(
+            domain=["tiktok", "instagram"],
+            range=["#2af0ea", "#E1306C"],
+        )
+        color = alt.Color("source:N", scale=scale)
+        c = (
+            alt.Chart(df)
+            .mark_line()
+            .encode(alt.Y('engagement_score').scale(zero=False).title("Engagement Score"), 
+                    x=alt.Y('timestamp').scale(zero=False).title("Date"),
+                    color=color)
+            .properties(height=600)
+        )
+        st.toast(f"df shape: {df.shape}")
+        return c, df
+
+
+
 appUtils = AppUtils()
 
 def login_callback():
     pass
 
 # Initialization
-st.session_state.tiktok_handle = "mvrco_poloo"
-st.session_state.instagram_handle = "mvrco_poloo"
+if "instagram_handle" not in st.session_state or "tiktok_handle" not in st.session_state:
+    st.session_state.tiktok_handle = "mvrco_poloo"
+    st.session_state.instagram_handle = "mvrco_poloo"
 st.set_page_config(layout="wide")
-
 
 # Sidebar
 with st.sidebar:
@@ -146,17 +190,16 @@ with st.sidebar:
     st.write("Social media metrics minus the doomscrolling. 🚀")
     st.write("")
 
-# Subscribe now! (st-paywall restriction forces me to split the sidebar into two parts lmao)
-# st.header("Get the gist with one look!")
-
+# Authentication
 add_auth(required=False, 
          login_sidebar=True, 
          subscribe_now_sidebar=False, 
          on_login=login_callback)
 
-# if not st.session_state.get("email", None): 
-#     st.write("Log in to try it out!")
 
+# Create user if it doesn't exist yet.
+# If it does, get user data
+# If not yet logged in, show demo page
 if st.session_state.get("email", None):
     user = appUtils.check_user_if_exists(st.session_state.email)
     warn_before_delete = False
@@ -196,9 +239,12 @@ if st.session_state.get("email", None):
         
     st.balloons()
 else:
-    option = st.selectbox(
-    "Select demo user",
-    ("Demo User 1 (mvrco_poloo)", "Demo User 2 (le_sserafim)", "Demo User 3 (enhypen)"))
+    st.selectbox(
+        "Select demo user",
+        ("Demo User 1 (mvrco_poloo)", "Demo User 2 (le_sserafim)", "Demo User 3 (enhypen)"), 
+        key="demo_user_selectbox",
+        on_change=appUtils.toggle_demo_user,
+    )
     st.write("")
     st.divider()
 
@@ -207,40 +253,14 @@ else:
 st.title("Hello!")
 
 # Chart
-data = appUtils.read_collection("metrics")
-df = pd.DataFrame(data)
-df = df.loc[(df["account_name"]==st.session_state.tiktok_handle) |( df["account_name"]==st.session_state.instagram_handle)]
-df = df.sort_values("timestamp")
-df["timestamp"] = pd.to_datetime(df["timestamp"]).dt.date
-
-scale = alt.Scale(
-    domain=["tiktok", "instagram"],
-    range=["#2af0ea", "#E1306C"],
-)
-color = alt.Color("source:N", scale=scale)
-c = (
-    alt.Chart(df)
-    .mark_line()
-    .encode(alt.Y('engagement_score').scale(zero=False).title("Engagement Score"), 
-            x=alt.Y('timestamp').scale(zero=False).title("Date"),
-            color=color)
-    .properties(height=600)
-)
-
-
 if st.session_state.get("email", None):
     st.header("Engagement Score")
 else:
     st.header("(Demo) Engagement Score")
 st.write("Likes, comments, shares, and views are all taken into account. 📈📉")
-st.altair_chart(c, use_container_width=True)
-# df["engagement_score_diff"] = df["engagement_score"].diff()
-# latest_row = df.tail(1).iloc[0]
 
-# if latest_row["engagement_score_diff"] > 0:
-#     st.success("You're doing great this week. Keep it up! 🎉🎉")
-# else:
-#     st.error("You're not doing so well this week. Try to post more engaging content! ✊✊")
+c, df = appUtils.get_chart()
+st.altair_chart(c, use_container_width=True)
 
 df = df[["source", "timestamp", "engagement_score", "total_comments", "total_views", "total_likes", "total_followers"]].rename(columns={
     "timestamp": "Date",
