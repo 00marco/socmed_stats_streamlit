@@ -143,7 +143,7 @@ st.set_page_config(layout="wide")
 # Sidebar
 with st.sidebar:
     st.title("LazyMetrics 📊")
-    st.write("For the easily distracted social media manager")
+    st.write("Social media metrics minus the doomscrolling. 🚀")
     st.write("")
 
 # Subscribe now! (st-paywall restriction forces me to split the sidebar into two parts lmao)
