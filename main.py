@@ -190,10 +190,20 @@ with st.sidebar:
     st.write("Social media metrics minus the doomscrolling. 🚀")
     st.write("")
 
+
+if not st.session_state.get("user_subscribed", False):
+    st.selectbox(
+        "Select demo user",
+        ("Demo User 1 (mvrco_poloo)", "Demo User 2 (le_sserafim)", "Demo User 3 (enhypen)"), 
+        key="demo_user_selectbox",
+        on_change=appUtils.toggle_demo_user,
+    )
+    st.write("")
+    
 # Authentication
 add_auth(required=False, 
          login_sidebar=True, 
-         subscribe_now_sidebar=False, 
+         subscribe_now_sidebar=True, 
          on_login=login_callback)
 
 
@@ -235,21 +245,13 @@ if st.session_state.get("email", None):
                                                 })
         st.divider()
     else:
-        st.divider()
+        st.write("")
         
     st.balloons()
-else:
-    st.selectbox(
-        "Select demo user",
-        ("Demo User 1 (mvrco_poloo)", "Demo User 2 (le_sserafim)", "Demo User 3 (enhypen)"), 
-        key="demo_user_selectbox",
-        on_change=appUtils.toggle_demo_user,
-    )
-    st.write("")
-    st.divider()
 
     
 # Welcome text
+st.divider()
 st.title("Hello!")
 
 # Chart
