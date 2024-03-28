@@ -248,7 +248,7 @@ if st.session_state.get("email", None):
     if st.session_state.get("user_subscribed", False):
         user_input_grid = grid([5,1], [5,1], [5,1], [5,1], vertical_align="bottom")
         user_input_grid.text_input("Tiktok handle", placeholder=tiktok_handle_from_db, key="tiktok_handle_user_input")
-        if user_input_grid.button("Save", key="save_tiktok_handle"):
+        if user_input_grid.button("Update", key="save_tiktok_handle"):
             user_input_grid.text_input("Confirm delete", placeholder="Write your email to confirm deletion", key="email_to_confirm_delete_tiktok_handle")
             if user_input_grid.button("Delete", type="primary"):
                 if st.session_state.email_to_confirm_delete_tiktok_handle == st.session_state.email:
@@ -280,7 +280,7 @@ if st.session_state.get("email", None):
         user_input_grid.write("")
                 
         user_input_grid.text_input("Instagram handle", placeholder=instagram_handle_from_db, key="instagram_handle_user_input")
-        if user_input_grid.button("Save", key="save_instagram_handle"):
+        if user_input_grid.button("Update", key="save_instagram_handle"):
             user_input_grid.text_input("Confirm delete", placeholder="Write your email to confirm deletion", key="email_to_confirm_delete_instagram_handle")
             if user_input_grid.button("Delete", type="primary"):
                 if st.session_state.email_to_confirm_delete == st.session_state.email:
