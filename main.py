@@ -6,6 +6,7 @@ import altair as alt
 import re
 from validate_email import validate_email
 from st_paywall import add_auth
+from streamlit_extras.grid import grid
 
 import json
 import pandas as pd
@@ -178,19 +179,38 @@ appUtils = AppUtils()
 def login_callback():
     pass
 
+
 # Initialization
 if "instagram_handle" not in st.session_state or "tiktok_handle" not in st.session_state:
     st.session_state.tiktok_handle = "mvrco_poloo"
     st.session_state.instagram_handle = "mvrco_poloo"
 st.set_page_config(layout="wide")
 
+
+
 # Sidebar
 with st.sidebar:
     st.title("LazyMetrics 📊")
     st.write("Social media metrics minus the doomscrolling. 🚀")
-    st.write("")
+    # if not st.session_state.get("email", False):
+    #     st.write("")
+    #     st.write("")
+    #     st.write("*(Logging in will create a new tab -- bad UX I know, but it's an annoying bug. 💀)*")
+    #     st.write("")
 
+# Authentication
+add_auth(required=False, 
+         login_sidebar=True, 
+         subscribe_now_sidebar=True, 
+         on_login=login_callback)
 
+    
+
+# Welcome text
+st.title("Hello!")
+st.divider()
+    
+# Select demo user if not logged in
 if not st.session_state.get("user_subscribed", False):
     st.selectbox(
         "Select demo user",
@@ -198,13 +218,7 @@ if not st.session_state.get("user_subscribed", False):
         key="demo_user_selectbox",
         on_change=appUtils.toggle_demo_user,
     )
-    st.write("")
-    
-# Authentication
-add_auth(required=False, 
-         login_sidebar=True, 
-         subscribe_now_sidebar=True, 
-         on_login=login_callback)
+    st.divider()
 
 
 # Create user if it doesn't exist yet.
@@ -215,9 +229,9 @@ if st.session_state.get("email", None):
     warn_before_delete = False
     if user is not None:
         st.toast(f"user exists: {user}")
-        tiktok_handle = user.get("data", {}).get("tiktok_handle")
-        instagram_handle = user.get("data", {}).get("instagram_handle")
-        if not tiktok_handle or not instagram_handle:
+        tiktok_handle_from_db = user.get("data", {}).get("tiktok_handle")
+        instagram_handle_from_db = user.get("data", {}).get("instagram_handle")
+        if not tiktok_handle_from_db or not instagram_handle_from_db:
             warn_before_delete = True
     else:
         user = {}
@@ -227,32 +241,65 @@ if st.session_state.get("email", None):
                                                  "email": st.session_state.email,
                                                  "data": {}
                                              })
-        tiktok_handle = ""
-        instagram_handle = ""
+        tiktok_handle_from_db = ""
+        instagram_handle_from_db = ""
     
+    # If user is subscribed, then show controls
     if st.session_state.get("user_subscribed", False):
-        st.write("")
-        st.text_input("Tiktok handle", placeholder=tiktok_handle, key="tiktok_handle")
-        st.text_input("Instagram handle", placeholder=instagram_handle, key="instagram_handle") #disable if value is not null
-        if st.button("Save"):
+        user_input_grid = grid([5,1], [5,1], vertical_align="bottom")
+        user_input_grid.text_input("Tiktok handle", placeholder=tiktok_handle_from_db, key="tiktok_handle_user_input")
+        if user_input_grid.button("Save", key="save_tiktok_handle"):
+            st.toast("Saved tiktok handle")
             appUtils.upload_record_if_not_exists("user",
                                                 data={
                                                     "email": st.session_state.email,
                                                     "data": {
-                                                        "instagram_handle": st.session_state.instagram_handle,
-                                                        "tiktok_handle": st.session_state.tiktok_handle
+                                                        "instagram_handle": st.session_state.instagram_handle_from_db,
+                                                        "tiktok_handle": st.session_state.tiktok_handle_user_input
                                                     }
                                                 })
+
+        user_input_grid.text_input("Instagram handle", placeholder=instagram_handle_from_db, key="instagram_handle") #disable if value is not null
+        if user_input_grid.button("Save", key="save_instagram_handle"):
+            st.toast("Saved instagram handle")
+            appUtils.upload_record_if_not_exists("user",
+                                                data={
+                                                    "email": st.session_state.email,
+                                                    "data": {
+                                                        "instagram_handle": st.session_state.instagram_handle_user_input,
+                                                        "tiktok_handle": st.session_state.tiktok_handle_from_db
+                                                    }
+                                                })
+        
+        # This section allows user to reset instagram and tiktok handles
+        st.write("")
+        st.write("")
+        if st.button("Reset data"):
+            st.error("If you want to change your handles, all data will be deleted.")
+            st.text_input("Confirm", placeholder="Write your email to confirm deletion", key="email_to_confirm_delete")
+            if st.button("Confirm delete", type="primary"):
+                if st.session_state.email_to_confirm_delete == st.session_state.email:
+                    appUtils.upload_record_if_not_exists("user",
+                                                        data={
+                                                            "email": st.session_state.email,
+                                                            "data": {}
+                                                        })
+                    appUtils.delete_user_data(st.session_state.email)
+
+                    st.session_state.email_to_confirm_delete = ""
+                    st.session_state.tiktok_handle = ""
+                    st.session_state.instagram_handle = ""
+                    st.session_state.tiktok_handle_user_input = ""
+                    st.session_state.instagram_handle_user_input = ""
+                    st.toast("Deleted user data.")
+                else:
+                    st.toast("Incorrect email")
         st.divider()
     else:
         st.write("")
         
     st.balloons()
 
-    
-# Welcome text
-st.divider()
-st.title("Hello!")
 
 # Chart
 if st.session_state.get("email", None):
@@ -284,9 +331,7 @@ st.write(" ")
 st.write(" ")
 st.write(" ")
 st.divider()
-st.write(" ")
-st.write(" ")
-
+st.header("Survey")
 with st.form("my_form"):
         st.write("Still validating this idea, let me know what you think! 🧪📊")
         answer_interest = st.text_input("Any suggestions?", key="answer_interest")
