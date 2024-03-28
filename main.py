@@ -246,54 +246,75 @@ if st.session_state.get("email", None):
     
     # If user is subscribed, then show controls
     if st.session_state.get("user_subscribed", False):
-        user_input_grid = grid([5,1], [5,1], vertical_align="bottom")
+        user_input_grid = grid([5,1], [5,1], [5,1], [5,1], vertical_align="bottom")
         user_input_grid.text_input("Tiktok handle", placeholder=tiktok_handle_from_db, key="tiktok_handle_user_input")
         if user_input_grid.button("Save", key="save_tiktok_handle"):
-            st.toast("Saved tiktok handle")
-            appUtils.upload_record_if_not_exists("user",
-                                                data={
-                                                    "email": st.session_state.email,
-                                                    "data": {
-                                                        "instagram_handle": st.session_state.instagram_handle_from_db,
-                                                        "tiktok_handle": st.session_state.tiktok_handle_user_input
-                                                    }
-                                                })
+            user_input_grid.text_input("Confirm delete", placeholder="Write your email to confirm deletion", key="email_to_confirm_delete_tiktok_handle")
+            if user_input_grid.button("Delete", type="primary"):
+                if st.session_state.email_to_confirm_delete_tiktok_handle == st.session_state.email:
+                    # appUtils.upload_record_if_not_exists("user",
+                    #                                     data={
+                    #                                         "email": st.session_state.email,
+                    #                                         "data": {}
+                    #                                     })
+                    # appUtils.delete_user_data(st.session_state.email)
 
-        user_input_grid.text_input("Instagram handle", placeholder=instagram_handle_from_db, key="instagram_handle") #disable if value is not null
-        if user_input_grid.button("Save", key="save_instagram_handle"):
-            st.toast("Saved instagram handle")
-            appUtils.upload_record_if_not_exists("user",
-                                                data={
-                                                    "email": st.session_state.email,
-                                                    "data": {
-                                                        "instagram_handle": st.session_state.instagram_handle_user_input,
-                                                        "tiktok_handle": st.session_state.tiktok_handle_from_db
-                                                    }
-                                                })
-        
-        # This section allows user to reset instagram and tiktok handles
-        st.write("")
-        st.write("")
-        if st.button("Reset data"):
-            st.error("If you want to change your handles, all data will be deleted.")
-            st.text_input("Confirm", placeholder="Write your email to confirm deletion", key="email_to_confirm_delete")
-            if st.button("Confirm delete", type="primary"):
-                if st.session_state.email_to_confirm_delete == st.session_state.email:
-                    appUtils.upload_record_if_not_exists("user",
-                                                        data={
-                                                            "email": st.session_state.email,
-                                                            "data": {}
-                                                        })
-                    appUtils.delete_user_data(st.session_state.email)
+                    # st.session_state.email_to_confirm_delete = ""
+                    # st.session_state.tiktok_handle = ""
+                    # st.session_state.instagram_handle = ""
+                    # st.session_state.tiktok_handle_user_input = ""
+                    # st.session_state.instagram_handle_user_input = ""
 
-                    st.session_state.email_to_confirm_delete = ""
-                    st.session_state.tiktok_handle = ""
-                    st.session_state.instagram_handle = ""
-                    st.session_state.tiktok_handle_user_input = ""
-                    st.session_state.instagram_handle_user_input = ""
+                    # appUtils.upload_record_if_not_exists("user",
+                    #     data={
+                    #         "email": st.session_state.email,
+                    #         "data": {
+                    #             "instagram_handle": st.session_state.instagram_handle_from_db,
+                    #             "tiktok_handle": st.session_state.tiktok_handle_user_input
+                    #         }
+                    #     })
                     st.toast("Deleted user data.")
                 else:
                     st.toast("Incorrect email")
+        user_input_grid.write("")
+        user_input_grid.write("")
+                
+        user_input_grid.text_input("Instagram handle", placeholder=instagram_handle_from_db, key="instagram_handle_user_input")
+        if user_input_grid.button("Save", key="save_instagram_handle"):
+            user_input_grid.text_input("Confirm delete", placeholder="Write your email to confirm deletion", key="email_to_confirm_delete_instagram_handle")
+            if user_input_grid.button("Delete", type="primary"):
+                if st.session_state.email_to_confirm_delete == st.session_state.email:
+                    # appUtils.upload_record_if_not_exists("user",
+                    #                                     data={
+                    #                                         "email": st.session_state.email,
+                    #                                         "data": {}
+                    #                                     })
+                    # appUtils.delete_user_data(st.session_state.email)
+
+                    # st.session_state.email_to_confirm_delete = ""
+                    # st.session_state.tiktok_handle = ""
+                    # st.session_state.instagram_handle = ""
+                    # st.session_state.tiktok_handle_user_input = ""
+                    # st.session_state.instagram_handle_user_input = ""
+
+                    # appUtils.upload_record_if_not_exists("user",
+                    #     data={
+                    #         "email": st.session_state.email,
+                    #         "data": {
+                    #             "instagram_handle": st.session_state.instagram_handle_from_db,
+                    #             "tiktok_handle": st.session_state.tiktok_handle_user_input
+                    #         }
+                    #     })
+                    st.toast("Deleted user data.")
+                else:
+                    st.toast("Incorrect email")
+            else: 
+                user_input_grid.write("")
+        else:
+            user_input_grid.write("")
+        
+        
+        # This section allows user to reset instagram and tiktok handles
         st.divider()
     else:
         st.write("")
